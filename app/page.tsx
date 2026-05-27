@@ -1,11 +1,5 @@
-"use client"
-
-import { useState } from "react"
 import { Sparkles } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { UrlInputForm } from "@/components/url-input-form"
 import {
   Card,
   CardContent,
@@ -15,9 +9,6 @@ import {
 } from "@/components/ui/card"
 
 export default function HomePage() {
-  const [url, setUrl] = useState("")
-  const [content, setContent] = useState("")
-
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <div className="container max-w-3xl py-16">
@@ -43,31 +34,7 @@ export default function HomePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="url">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="url">URL</TabsTrigger>
-                <TabsTrigger value="paste">Paste article</TabsTrigger>
-              </TabsList>
-              <TabsContent value="url" className="space-y-4 pt-4">
-                <Input
-                  type="url"
-                  placeholder="https://example.com/your-article"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                />
-              </TabsContent>
-              <TabsContent value="paste" className="space-y-4 pt-4">
-                <Textarea
-                  placeholder="Paste your article text here..."
-                  rows={10}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                />
-              </TabsContent>
-            </Tabs>
-            <Button className="mt-4 w-full" size="lg">
-              Analyze
-            </Button>
+            <UrlInputForm />
           </CardContent>
         </Card>
       </div>
