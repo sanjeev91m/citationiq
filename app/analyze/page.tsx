@@ -2,12 +2,19 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { ErrorState } from "@/components/error-state"
+import { HistorySidebar } from "@/components/history-sidebar"
+import { ReportLoadingState } from "@/components/loading-state"
 import { Report } from "@/components/report"
-import type { ScoreResult } from "@/types/score"
+import {
+  getReportById,
+  hashContent,
+  saveReport,
+  updateReportRewrites,
+} from "@/lib/history"
 import type { RewriteBlock } from "@/types/rewrite"
+import type { ScoreResult } from "@/types/score"
 
 type AnalysisInput =
   | { mode: "url"; url: string }
@@ -18,28 +25,51 @@ export default function AnalyzePage() {
   const [score, setScore] = useState<ScoreResult | null>(null)
   const [rewrites, setRewrites] = useState<RewriteBlock[] | null>(null)
   const [rewritesLoading, setRewritesLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<{ title: string; message: string } | null>(null)
   const [meta, setMeta] = useState<{ title?: string; url?: string }>({})
   const [stage, setStage] = useState("Loading…")
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    const id = params.get("id")
-    if (!id) {
+    const sessionId = params.get("session")
+    const reportId = params.get("report")
+
+    if (reportId) {
+      const cached = getReportById(reportId)
+      if (!cached) {
+        setError({
+          title: "Report not found",
+          message: "This analysis is no longer in your history.",
+        })
+        return
+      }
+      setMeta({ title: cached.title, url: cached.url })
+      setScore(cached.score)
+      setRewrites(cached.rewrites)
+      return
+    }
+
+    if (!sessionId) {
       router.replace("/")
       return
     }
 
-    const raw = sessionStorage.getItem(`citationiq:${id}`)
+    const raw = sessionStorage.getItem(`citationiq:${sessionId}`)
     if (!raw) {
-      setError("Analysis session not found. Start a new analysis.")
+      setError({
+        title: "Analysis session not found",
+        message: "Start a new analysis to continue.",
+      })
       return
     }
     let input: AnalysisInput
     try {
       input = JSON.parse(raw) as AnalysisInput
     } catch {
-      setError("Analysis session is corrupted. Start a new analysis.")
+      setError({
+        title: "Session corrupted",
+        message: "The stored analysis input could not be read. Start a new analysis.",
+      })
       return
     }
 
@@ -90,6 +120,11 @@ export default function AnalyzePage() {
         const scoreResult = (await analyzeRes.json()) as ScoreResult
         if (cancelled) return
         setScore(scoreResult)
+
+        const id = await hashContent(content)
+        saveReport({ id, url, title, score: scoreResult, rewrites: null })
+        window.history.replaceState(null, "", `/analyze?report=${id}`)
+
         setRewritesLoading(true)
         setStage("Generating rewrites…")
 
@@ -107,9 +142,13 @@ export default function AnalyzePage() {
         const rewriteResult = (await rewriteRes.json()) as { rewrites: RewriteBlock[] }
         if (cancelled) return
         setRewrites(rewriteResult.rewrites)
+        updateReportRewrites(id, rewriteResult.rewrites)
       } catch (err) {
         if (cancelled) return
-        setError(err instanceof Error ? err.message : "Unexpected error")
+        setError({
+          title: "Analysis failed",
+          message: err instanceof Error ? err.message : "Unexpected error",
+        })
       }
     }
 
@@ -126,26 +165,23 @@ export default function AnalyzePage() {
           <a href="/" className="text-2xl font-semibold tracking-tight">
             CitationIQ
           </a>
-          <Button variant="outline" size="sm" onClick={() => router.push("/")}>
-            New analysis
-          </Button>
+          <div className="flex items-center gap-2">
+            <HistorySidebar />
+            <Button variant="outline" size="sm" onClick={() => router.push("/")}>
+              New analysis
+            </Button>
+          </div>
         </header>
 
         {error ? (
-          <Card>
-            <CardContent className="space-y-4 py-10 text-center">
-              <p className="text-base text-destructive">{error}</p>
-              <Button onClick={() => router.push("/")}>Start over</Button>
-            </CardContent>
-          </Card>
+          <ErrorState
+            title={error.title}
+            message={error.message}
+            onRetry={() => router.push("/")}
+            retryLabel="Start over"
+          />
         ) : score === null ? (
-          <Card>
-            <CardContent className="flex flex-col items-center gap-3 py-20 text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">{stage}</p>
-              <p className="text-xs text-muted-foreground">This usually takes 20-40 seconds.</p>
-            </CardContent>
-          </Card>
+          <ReportLoadingState stage={stage} />
         ) : (
           <Report
             score={score}

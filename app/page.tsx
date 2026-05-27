@@ -1,4 +1,5 @@
 import { Sparkles } from "lucide-react"
+import { HistorySidebar } from "@/components/history-sidebar"
 import { UrlInputForm } from "@/components/url-input-form"
 import {
   Card,
@@ -11,7 +12,11 @@ import {
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      <div className="container max-w-3xl py-16">
+      <div className="container max-w-3xl py-8">
+        <div className="mb-8 flex justify-end">
+          <HistorySidebar />
+        </div>
+
         <header className="mb-12 space-y-4 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1 text-sm text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5" />

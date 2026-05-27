@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
+import { CopyButton } from "@/components/copy-button"
 import { DIMENSION_LABELS } from "@/types/score"
 import type { RewriteBlock } from "@/types/rewrite"
 
@@ -23,8 +24,11 @@ export function RewriteBlockCard({ rewrite }: { rewrite: RewriteBlock }) {
           </div>
         </div>
         <div>
-          <div className="mb-1.5 text-xs font-medium uppercase tracking-wide text-emerald-700">
-            Rewritten
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+              Rewritten
+            </span>
+            <CopyButton text={rewrite.rewrittenSnippet} label="Copy" />
           </div>
           <div className="whitespace-pre-wrap rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm leading-relaxed">
             {rewrite.rewrittenSnippet}

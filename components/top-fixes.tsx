@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CopyButton } from "@/components/copy-button"
 
 export function TopFixes({ fixes }: { fixes: string[] }) {
   return (
@@ -10,11 +11,12 @@ export function TopFixes({ fixes }: { fixes: string[] }) {
       <CardContent>
         <ol className="space-y-3">
           {fixes.map((fix, i) => (
-            <li key={i} className="flex gap-3">
+            <li key={i} className="flex items-start gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                 {i + 1}
               </span>
-              <span className="pt-0.5 text-sm">{fix}</span>
+              <span className="flex-1 pt-0.5 text-sm">{fix}</span>
+              <CopyButton text={fix} />
             </li>
           ))}
         </ol>

@@ -44,9 +44,9 @@ export function UrlInputForm() {
       payload = { mode, content: content.trim() }
     }
 
-    const id = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4)
-    sessionStorage.setItem(`citationiq:${id}`, JSON.stringify(payload))
-    router.push(`/analyze?id=${id}`)
+    const sessionId = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4)
+    sessionStorage.setItem(`citationiq:${sessionId}`, JSON.stringify(payload))
+    router.push(`/analyze?session=${sessionId}`)
   }
 
   return (
