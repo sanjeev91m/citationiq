@@ -24,6 +24,7 @@ export const extractedArticleSchema = z.object({
   siteName: z.string().nullable(),
   content: z.string(),
   textContent: z.string(),
+  markdown: z.string(),
   excerpt: z.string(),
   length: z.number(),
 })

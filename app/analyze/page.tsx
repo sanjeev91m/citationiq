@@ -93,12 +93,13 @@ export default function AnalyzePage() {
             throw new Error(body.error || `Extraction failed (HTTP ${res.status})`)
           }
           const article = (await res.json()) as {
+            markdown: string
             textContent: string
             title: string
             url: string
           }
           if (cancelled) return
-          content = article.textContent
+          content = article.markdown || article.textContent
           title = article.title || undefined
           url = article.url
         } else {

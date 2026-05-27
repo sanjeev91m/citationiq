@@ -1,6 +1,15 @@
 import { Readability } from "@mozilla/readability"
 import { JSDOM } from "jsdom"
+import TurndownService from "turndown"
 import type { ExtractedArticle } from "@/types/extract"
+
+const turndown = new TurndownService({
+  headingStyle: "atx",
+  codeBlockStyle: "fenced",
+  bulletListMarker: "-",
+  emDelimiter: "*",
+})
+turndown.remove(["script", "style", "noscript"])
 
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
@@ -65,14 +74,17 @@ export function extractFromHtml(html: string, url: string): ExtractedArticle {
   }
 
   const textContent = article.textContent.replace(/\s+/g, " ").trim()
+  const articleHtml = article.content ?? ""
+  const markdown = articleHtml ? turndown.turndown(articleHtml).trim() : textContent
 
   return {
     url,
     title: article.title ?? "",
     byline: article.byline ?? null,
     siteName: article.siteName ?? null,
-    content: article.content ?? "",
+    content: articleHtml,
     textContent,
+    markdown,
     excerpt: article.excerpt ?? "",
     length: textContent.length,
   }

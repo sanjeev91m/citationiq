@@ -67,13 +67,18 @@ export function UrlInputForm() {
             }}
           />
         </TabsContent>
-        <TabsContent value="paste" className="pt-4">
+        <TabsContent value="paste" className="space-y-2 pt-4">
           <Textarea
             placeholder="Paste your article text here…"
             rows={10}
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
+          <p className="text-xs text-muted-foreground">
+            Supports markdown. Use <code className="rounded bg-muted px-1">#</code> for H1,{" "}
+            <code className="rounded bg-muted px-1">##</code> for H2, lists, and tables so the
+            Structured Formatting score reflects your real hierarchy.
+          </p>
         </TabsContent>
       </Tabs>
       {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
