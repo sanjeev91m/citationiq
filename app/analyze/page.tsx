@@ -7,13 +7,7 @@ import { ErrorState } from "@/components/error-state"
 import { HistorySidebar } from "@/components/history-sidebar"
 import { ReportLoadingState } from "@/components/loading-state"
 import { Report } from "@/components/report"
-import {
-  getReportById,
-  hashContent,
-  saveReport,
-  updateReportRewrites,
-} from "@/lib/history"
-import type { RewriteBlock } from "@/types/rewrite"
+import { getReportById, hashContent, saveReport } from "@/lib/history"
 import type { ScoreResult } from "@/types/score"
 
 type AnalysisInput =
@@ -23,8 +17,6 @@ type AnalysisInput =
 export default function AnalyzePage() {
   const router = useRouter()
   const [score, setScore] = useState<ScoreResult | null>(null)
-  const [rewrites, setRewrites] = useState<RewriteBlock[] | null>(null)
-  const [rewritesLoading, setRewritesLoading] = useState(false)
   const [error, setError] = useState<{ title: string; message: string } | null>(null)
   const [meta, setMeta] = useState<{ title?: string; url?: string }>({})
   const [stage, setStage] = useState("Loading…")
@@ -45,7 +37,6 @@ export default function AnalyzePage() {
       }
       setMeta({ title: cached.title, url: cached.url })
       setScore(cached.score)
-      setRewrites(cached.rewrites)
       return
     }
 
@@ -107,7 +98,7 @@ export default function AnalyzePage() {
         }
 
         setMeta({ title, url })
-        setStage("Analyzing content with Claude…")
+        setStage("Auditing page with Claude…")
 
         const analyzeRes = await fetch("/api/analyze", {
           method: "POST",
@@ -123,27 +114,8 @@ export default function AnalyzePage() {
         setScore(scoreResult)
 
         const id = await hashContent(content)
-        saveReport({ id, url, title, score: scoreResult, rewrites: null })
+        saveReport({ id, url, title, score: scoreResult })
         window.history.replaceState(null, "", `/analyze?report=${id}`)
-
-        setRewritesLoading(true)
-        setStage("Generating rewrites…")
-
-        const rewriteRes = await fetch("/api/rewrite", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content, title, url, score: scoreResult }),
-        })
-        if (cancelled) return
-        setRewritesLoading(false)
-        if (!rewriteRes.ok) {
-          console.error("rewrites failed; report will render without them")
-          return
-        }
-        const rewriteResult = (await rewriteRes.json()) as { rewrites: RewriteBlock[] }
-        if (cancelled) return
-        setRewrites(rewriteResult.rewrites)
-        updateReportRewrites(id, rewriteResult.rewrites)
       } catch (err) {
         if (cancelled) return
         setError({
@@ -184,12 +156,7 @@ export default function AnalyzePage() {
         ) : score === null ? (
           <ReportLoadingState stage={stage} />
         ) : (
-          <Report
-            score={score}
-            rewrites={rewrites}
-            rewritesLoading={rewritesLoading}
-            meta={meta}
-          />
+          <Report score={score} meta={meta} />
         )}
       </div>
     </main>

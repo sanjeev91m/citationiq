@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CopyButton } from "@/components/copy-button"
 import { scoreClasses } from "@/lib/score-color"
 import { DIMENSION_LABELS, type DimensionKey, type DimensionResult } from "@/types/score"
 
@@ -25,17 +24,8 @@ export function DimensionCard({
           />
         </div>
       </CardHeader>
-      <CardContent className="space-y-3 text-sm">
+      <CardContent className="text-sm">
         <p className="text-muted-foreground">{result.reasoning}</p>
-        <ul className="space-y-1.5">
-          {result.fixes.map((fix, i) => (
-            <li key={i} className="flex items-start gap-2">
-              <span className="text-muted-foreground">→</span>
-              <span className="flex-1">{fix}</span>
-              <CopyButton text={fix} />
-            </li>
-          ))}
-        </ul>
       </CardContent>
     </Card>
   )

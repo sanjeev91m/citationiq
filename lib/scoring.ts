@@ -33,13 +33,12 @@ export async function scoreArticle(args: {
 
   const response = await anthropic.messages.create({
     model: SCORING_MODEL,
-    max_tokens: 4000,
-    temperature: 0,
+    max_tokens: 6000,
     system: SCORING_SYSTEM_PROMPT,
     tools: [
       {
         name: SCORE_TOOL_NAME,
-        description: "Submit the structured AI citation readiness score for the article.",
+        description: "Submit the page-type-aware citation audit result.",
         input_schema: SCORE_TOOL_INPUT_SCHEMA as never,
       },
     ],

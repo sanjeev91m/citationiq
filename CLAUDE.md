@@ -12,7 +12,7 @@
 
 ## Models
 
-- **Scoring (`/api/analyze`):** `claude-opus-4-7` — quality matters; deterministic (`temperature: 0`)
+- **Scoring (`/api/analyze`):** `claude-opus-4-7` — quality matters. (Note: `claude-opus-4-7` deprecates the `temperature` parameter; do not pass it. Output is deterministic-ish but not seeded.)
 - **Rewrites (`/api/rewrite`):** `claude-sonnet-4-5` — speed/cost tradeoff; mildly creative (`temperature: 0.3`). (Rewrites flow is slated for removal in the page-type-aware migration; see PLAN.md.)
 - These are swappable via a single constant in `lib/anthropic.ts`. Do not hardcode model IDs anywhere else.
 

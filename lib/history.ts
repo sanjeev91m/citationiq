@@ -1,9 +1,17 @@
-import type { RewriteBlock } from "@/types/rewrite"
 import type { ScoreResult } from "@/types/score"
 import type { StoredReport } from "@/types/history"
 
 const STORAGE_KEY = "citationiq:history"
 const MAX_ENTRIES = 10
+
+function isCurrentShape(item: unknown): item is StoredReport {
+  if (!item || typeof item !== "object") return false
+  const score = (item as { score?: unknown }).score
+  if (!score || typeof score !== "object") return false
+  const dims = (score as { dimensions?: unknown }).dimensions
+  if (!dims || typeof dims !== "object") return false
+  return typeof (dims as { structure?: { score?: unknown } }).structure?.score === "number"
+}
 
 function read(): StoredReport[] {
   if (typeof window === "undefined") return []
@@ -12,7 +20,7 @@ function read(): StoredReport[] {
     if (!raw) return []
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
-    return parsed as StoredReport[]
+    return parsed.filter(isCurrentShape)
   } catch {
     return []
   }
@@ -49,19 +57,10 @@ export function saveReport(report: {
   url?: string
   title?: string
   score: ScoreResult
-  rewrites: RewriteBlock[] | null
 }) {
   const items = read().filter((r) => r.id !== report.id)
   items.unshift({ ...report, createdAt: Date.now() })
   write(items.slice(0, MAX_ENTRIES))
-}
-
-export function updateReportRewrites(id: string, rewrites: RewriteBlock[]) {
-  const items = read()
-  const idx = items.findIndex((r) => r.id === id)
-  if (idx === -1) return
-  items[idx] = { ...items[idx], rewrites }
-  write(items)
 }
 
 export function clearHistory() {
