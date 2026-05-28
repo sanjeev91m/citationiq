@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk"
 
-export const SCORING_MODEL = "claude-opus-4-5"
+export const SCORING_MODEL = "claude-opus-4-7"
 export const REWRITE_MODEL = "claude-sonnet-4-5"
 
 let cachedClient: Anthropic | null = null

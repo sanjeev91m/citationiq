@@ -12,8 +12,8 @@
 
 ## Models
 
-- **Scoring (`/api/analyze`):** `claude-opus-4-5` — quality matters; deterministic (`temperature: 0`)
-- **Rewrites (`/api/rewrite`):** `claude-sonnet-4-5` — speed/cost tradeoff; mildly creative (`temperature: 0.3`)
+- **Scoring (`/api/analyze`):** `claude-opus-4-7` — quality matters; deterministic (`temperature: 0`)
+- **Rewrites (`/api/rewrite`):** `claude-sonnet-4-5` — speed/cost tradeoff; mildly creative (`temperature: 0.3`). (Rewrites flow is slated for removal in the page-type-aware migration; see PLAN.md.)
 - These are swappable via a single constant in `lib/anthropic.ts`. Do not hardcode model IDs anywhere else.
 
 ## Code style
@@ -63,7 +63,7 @@ hooks/
 
 ### 🔒 The scoring prompt is locked
 
-`lib/scoring-prompt.ts` is the product's core IP. **Do not refactor, restructure, "improve," or rewrite it without explicit approval from the user in the current conversation.** This includes:
+`lib/scoring-prompt.ts` is the product's core IP. **Do not refactor, restructure, "improve," or rewrite it without explicit approval from the user in the current conversation.** (Most recent approved rewrite: page-type-aware 9-dimension auditor, 2026-05-28. See PLAN.md migration section for the rationale.) This includes:
 
 - Reorganizing sections
 - Renaming dimensions
