@@ -51,6 +51,10 @@ export function UrlInputForm() {
 
   return (
     <div>
+      <p className="mb-2 text-xs text-muted-foreground">
+        Behind Cloudflare or auditing a WordPress draft? Use{" "}
+        <span className="font-medium text-foreground">Paste Code</span>.
+      </p>
       <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="url">URL</TabsTrigger>
