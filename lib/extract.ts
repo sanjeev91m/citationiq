@@ -46,6 +46,16 @@ turndown.addRule("figure", {
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
 const FETCH_TIMEOUT_MS = 15_000
+const BLOCKED_STATUSES = new Set([401, 403, 429, 503])
+
+function detectBotProtection(response: Response): string | null {
+  const h = response.headers
+  if (h.get("cf-ray") || /cloudflare/i.test(h.get("server") ?? "")) return "Cloudflare"
+  if (/akamaighost/i.test(h.get("server") ?? "") || h.get("x-akamai-transformed")) return "Akamai"
+  if (h.get("x-iinfo") || /^incap_ses/.test(h.get("set-cookie") ?? "")) return "Imperva"
+  if (h.get("x-datadome")) return "DataDome"
+  return null
+}
 
 export class ExtractError extends Error {
   readonly status: number
@@ -81,6 +91,16 @@ export async function extractFromUrl(url: string): Promise<ExtractedArticle> {
   clearTimeout(timer)
 
   if (!response.ok) {
+    const protector = detectBotProtection(response)
+    if (protector || BLOCKED_STATUSES.has(response.status)) {
+      const source = protector
+        ? `${protector} bot protection`
+        : `the server (HTTP ${response.status})`
+      throw new ExtractError(
+        422,
+        `Blocked by ${source}. Open the page in your browser, view source (Cmd+Opt+U on Mac, Ctrl+U on Windows), copy all, and paste into the "Paste Code" tab on the home page.`
+      )
+    }
     throw new ExtractError(422, `Page returned HTTP ${response.status}`)
   }
 
