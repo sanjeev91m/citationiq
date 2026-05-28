@@ -12,7 +12,7 @@ import type { ScoreResult } from "@/types/score"
 
 type AnalysisInput =
   | { mode: "url"; url: string }
-  | { mode: "paste"; content: string }
+  | { mode: "html"; html: string }
 
 export default function AnalyzePage() {
   const router = useRouter()
@@ -72,30 +72,28 @@ export default function AnalyzePage() {
         let title: string | undefined
         let url: string | undefined
 
-        if (input.mode === "url") {
-          setStage("Fetching article…")
-          const res = await fetch("/api/extract", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: input.url }),
-          })
-          if (!res.ok) {
-            const body = (await res.json().catch(() => ({}))) as { error?: string }
-            throw new Error(body.error || `Extraction failed (HTTP ${res.status})`)
-          }
-          const article = (await res.json()) as {
-            markdown: string
-            textContent: string
-            title: string
-            url: string
-          }
-          if (cancelled) return
-          content = article.markdown || article.textContent
-          title = article.title || undefined
-          url = article.url
-        } else {
-          content = input.content
+        setStage(input.mode === "url" ? "Fetching article…" : "Parsing HTML…")
+        const extractBody =
+          input.mode === "url" ? { url: input.url } : { html: input.html }
+        const res = await fetch("/api/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(extractBody),
+        })
+        if (!res.ok) {
+          const body = (await res.json().catch(() => ({}))) as { error?: string }
+          throw new Error(body.error || `Extraction failed (HTTP ${res.status})`)
         }
+        const article = (await res.json()) as {
+          markdown: string
+          textContent: string
+          title: string
+          url: string
+        }
+        if (cancelled) return
+        content = article.markdown || article.textContent
+        title = article.title || undefined
+        url = article.url || undefined
 
         setMeta({ title, url })
         setStage("Auditing page with Claude…")

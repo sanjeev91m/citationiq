@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { ExtractError, extractFromUrl } from "@/lib/extract"
+import { ExtractError, extractFromHtml, extractFromUrl } from "@/lib/extract"
 import { extractRequestSchema } from "@/types/extract"
 
 export const runtime = "nodejs"
@@ -15,7 +15,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const article = await extractFromUrl(parsed.data.url)
+    const article =
+      "url" in parsed.data
+        ? await extractFromUrl(parsed.data.url)
+        : extractFromHtml(parsed.data.html, "")
     return NextResponse.json(article)
   } catch (err) {
     if (err instanceof ExtractError) {

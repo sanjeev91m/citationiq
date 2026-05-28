@@ -7,18 +7,18 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-type Mode = "url" | "paste"
+type Mode = "url" | "html"
 
 export function UrlInputForm() {
   const router = useRouter()
   const [mode, setMode] = useState<Mode>("url")
   const [url, setUrl] = useState("")
-  const [content, setContent] = useState("")
+  const [html, setHtml] = useState("")
   const [error, setError] = useState("")
 
   function submit() {
     setError("")
-    let payload: { mode: Mode; url?: string; content?: string }
+    let payload: { mode: "url"; url: string } | { mode: "html"; html: string }
 
     if (mode === "url") {
       if (!url.trim()) {
@@ -37,11 +37,11 @@ export function UrlInputForm() {
       }
       payload = { mode, url: url.trim() }
     } else {
-      if (content.trim().length < 100) {
-        setError("Paste at least 100 characters.")
+      if (html.trim().length < 50) {
+        setError("Paste at least 50 characters of HTML.")
         return
       }
-      payload = { mode, content: content.trim() }
+      payload = { mode, html: html.trim() }
     }
 
     const sessionId = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4)
@@ -54,7 +54,7 @@ export function UrlInputForm() {
       <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="url">URL</TabsTrigger>
-          <TabsTrigger value="paste">Paste article</TabsTrigger>
+          <TabsTrigger value="html">Paste Code</TabsTrigger>
         </TabsList>
         <TabsContent value="url" className="pt-4">
           <Input
@@ -67,17 +67,18 @@ export function UrlInputForm() {
             }}
           />
         </TabsContent>
-        <TabsContent value="paste" className="space-y-2 pt-4">
+        <TabsContent value="html" className="space-y-2 pt-4">
           <Textarea
-            placeholder="Paste your article text here…"
+            placeholder="Paste the page's HTML source here, e.g. <article><h1>…</h1><h2>…</h2><p>…</p>…</article>"
             rows={10}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
+            value={html}
+            onChange={(e) => setHtml(e.target.value)}
+            className="font-mono text-xs"
           />
           <p className="text-xs text-muted-foreground">
-            Supports markdown. Use <code className="rounded bg-muted px-1">#</code> for H1,{" "}
-            <code className="rounded bg-muted px-1">##</code> for H2, lists, and tables so the
-            Structured Formatting score reflects your real hierarchy.
+            Paste raw HTML (view-source or copy of the article element). Same Readability +
+            markdown pipeline as URL mode runs over it, so the audit reads your real H1 / H2 /
+            H3 hierarchy, lists, and tables.
           </p>
         </TabsContent>
       </Tabs>

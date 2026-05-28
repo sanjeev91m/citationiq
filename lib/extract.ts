@@ -65,7 +65,7 @@ export async function extractFromUrl(url: string): Promise<ExtractedArticle> {
 }
 
 export function extractFromHtml(html: string, url: string): ExtractedArticle {
-  const dom = new JSDOM(html, { url })
+  const dom = new JSDOM(html, url ? { url } : undefined)
   const doc = dom.window.document
 
   // Capture the semantic-tag fallback BEFORE running Readability, which mutates

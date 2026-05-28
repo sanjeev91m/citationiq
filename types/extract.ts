@@ -12,9 +12,10 @@ const httpUrl = z.string().refine(
   { message: "Must be a valid http(s) URL" }
 )
 
-export const extractRequestSchema = z.object({
-  url: httpUrl,
-})
+export const extractRequestSchema = z.union([
+  z.object({ url: httpUrl }),
+  z.object({ html: z.string().min(50, "HTML must be at least 50 characters") }),
+])
 export type ExtractRequest = z.infer<typeof extractRequestSchema>
 
 export const extractedArticleSchema = z.object({
