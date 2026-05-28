@@ -64,16 +64,48 @@ export async function extractFromUrl(url: string): Promise<ExtractedArticle> {
   return extractFromHtml(html, url)
 }
 
+function cleanedHtmlAndText(el: Element): { html: string; text: string } {
+  const clone = el.cloneNode(true) as Element
+  clone.querySelectorAll("script, style, noscript").forEach((n) => n.remove())
+  return {
+    html: clone.outerHTML,
+    text: (clone.textContent ?? "").replace(/\s+/g, " ").trim(),
+  }
+}
+
+function selectFallback(doc: Document): { html: string; text: string } {
+  const mainEl = doc.querySelector("main")
+  const articleEls = Array.from(doc.querySelectorAll("article"))
+
+  // Listicle / index page with multiple <article> children inside a <main> wrapper:
+  // use <main> to capture every item (one <article> alone would miss the rest).
+  if (mainEl && articleEls.length > 1) return cleanedHtmlAndText(mainEl)
+
+  // Multiple <article>s but no <main> wrapper: concatenate them.
+  if (articleEls.length > 1) {
+    const wrap = doc.createElement("div")
+    articleEls.forEach((a) => wrap.appendChild(a.cloneNode(true)))
+    return cleanedHtmlAndText(wrap)
+  }
+
+  // Single <article>: standard article page (e.g. cashkr.com).
+  if (articleEls.length === 1) return cleanedHtmlAndText(articleEls[0])
+
+  // Only <main> exists: use it.
+  if (mainEl) return cleanedHtmlAndText(mainEl)
+
+  return { html: "", text: "" }
+}
+
 export function extractFromHtml(html: string, url: string): ExtractedArticle {
   const dom = new JSDOM(html, url ? { url } : undefined)
   const doc = dom.window.document
 
   // Capture the semantic-tag fallback BEFORE running Readability, which mutates
-  // the DOM. Some sites (cashkr.com is one) cause Readability to pick the footer
-  // as "main content"; preferring an explicit <article>/<main> rescues those.
-  const fallbackEl = doc.querySelector("article") ?? doc.querySelector("main")
-  const fallbackHtml = fallbackEl?.outerHTML ?? ""
-  const fallbackText = (fallbackEl?.textContent ?? "").replace(/\s+/g, " ").trim()
+  // the DOM. Readability misidentifies main content on some pages — listicles
+  // (91mobiles) collapse to the intro paragraph; some sites pick the footer.
+  // Preferring an explicit <main>/<article> structure rescues both cases.
+  const { html: fallbackHtml, text: fallbackText } = selectFallback(doc)
 
   const reader = new Readability(doc)
   const article = reader.parse()
