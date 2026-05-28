@@ -1,5 +1,5 @@
 import { Readability } from "@mozilla/readability"
-import { JSDOM } from "jsdom"
+import { parseHTML } from "linkedom"
 import TurndownService from "turndown"
 // @ts-expect-error — turndown-plugin-gfm ships without its own types
 import * as turndownGfm from "turndown-plugin-gfm"
@@ -202,8 +202,8 @@ function selectFallback(doc: Document): { html: string; text: string } {
 }
 
 export function extractFromHtml(html: string, url: string): ExtractedArticle {
-  const dom = new JSDOM(html, url ? { url } : undefined)
-  const doc = dom.window.document
+  const { document } = parseHTML(html)
+  const doc = document as unknown as Document
 
   // 1. Pull structured/meta data BEFORE any DOM mutation strips it.
   const meta = extractMeta(doc)

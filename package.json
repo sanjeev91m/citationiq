@@ -17,7 +17,7 @@
     "@radix-ui/react-tabs": "^1.1.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "jsdom": "^29.1.1",
+    "linkedom": "^0.18.12",
     "lucide-react": "^0.460.0",
     "next": "^14.2.18",
     "react": "^18.3.1",
@@ -29,7 +29,6 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/jsdom": "^28.0.3",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
