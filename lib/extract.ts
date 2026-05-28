@@ -66,26 +66,41 @@ export async function extractFromUrl(url: string): Promise<ExtractedArticle> {
 
 export function extractFromHtml(html: string, url: string): ExtractedArticle {
   const dom = new JSDOM(html, { url })
-  const reader = new Readability(dom.window.document)
-  const article = reader.parse()
+  const doc = dom.window.document
 
-  if (!article || !article.textContent || article.textContent.trim().length === 0) {
+  // Capture the semantic-tag fallback BEFORE running Readability, which mutates
+  // the DOM. Some sites (cashkr.com is one) cause Readability to pick the footer
+  // as "main content"; preferring an explicit <article>/<main> rescues those.
+  const fallbackEl = doc.querySelector("article") ?? doc.querySelector("main")
+  const fallbackHtml = fallbackEl?.outerHTML ?? ""
+  const fallbackText = (fallbackEl?.textContent ?? "").replace(/\s+/g, " ").trim()
+
+  const reader = new Readability(doc)
+  const article = reader.parse()
+  const readabilityText = (article?.textContent ?? "").replace(/\s+/g, " ").trim()
+  const readabilityHtml = article?.content ?? ""
+
+  const useFallback =
+    fallbackText.length > 500 && fallbackText.length > readabilityText.length * 3
+
+  const bodyHtml = useFallback ? fallbackHtml : readabilityHtml
+  const bodyText = useFallback ? fallbackText : readabilityText
+
+  if (bodyText.length === 0) {
     throw new ExtractError(422, "Could not extract article content from this page")
   }
 
-  const textContent = article.textContent.replace(/\s+/g, " ").trim()
-  const articleHtml = article.content ?? ""
-  const markdown = articleHtml ? turndown.turndown(articleHtml).trim() : textContent
+  const markdown = bodyHtml ? turndown.turndown(bodyHtml).trim() : bodyText
 
   return {
     url,
-    title: article.title ?? "",
-    byline: article.byline ?? null,
-    siteName: article.siteName ?? null,
-    content: articleHtml,
-    textContent,
+    title: article?.title ?? "",
+    byline: article?.byline ?? null,
+    siteName: article?.siteName ?? null,
+    content: bodyHtml,
+    textContent: bodyText,
     markdown,
-    excerpt: article.excerpt ?? "",
-    length: textContent.length,
+    excerpt: article?.excerpt ?? "",
+    length: bodyText.length,
   }
 }
