@@ -1,6 +1,8 @@
 import { Readability } from "@mozilla/readability"
 import { JSDOM } from "jsdom"
 import TurndownService from "turndown"
+// @ts-expect-error — turndown-plugin-gfm ships without its own types
+import * as turndownGfm from "turndown-plugin-gfm"
 import type { ExtractedArticle } from "@/types/extract"
 
 const turndown = new TurndownService({
@@ -9,6 +11,8 @@ const turndown = new TurndownService({
   bulletListMarker: "-",
   emDelimiter: "*",
 })
+const tablesPlugin = turndownGfm.tables ?? turndownGfm.default?.tables
+if (tablesPlugin) turndown.use(tablesPlugin)
 turndown.remove(["script", "style", "noscript"])
 
 const USER_AGENT =
