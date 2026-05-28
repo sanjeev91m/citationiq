@@ -18,8 +18,8 @@ export function ReportLoadingState({ stage }: { stage: string }) {
 
       <div>
         <Skeleton className="mb-4 h-6 w-40" />
-        <div className="grid gap-3 md:grid-cols-2">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 9 }).map((_, i) => (
             <Card key={i}>
               <CardHeader className="space-y-3">
                 <div className="flex justify-between">

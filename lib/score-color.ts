@@ -33,3 +33,36 @@ const TIER_CLASSES = {
 export function scoreClasses(score: number) {
   return TIER_CLASSES[scoreTier(score)]
 }
+
+const PRIORITY_CLASSES = {
+  critical: {
+    text: "text-red-700",
+    bg: "bg-red-50",
+    border: "border-red-200",
+    dot: "bg-red-500",
+  },
+  high: {
+    text: "text-orange-700",
+    bg: "bg-orange-50",
+    border: "border-orange-200",
+    dot: "bg-orange-500",
+  },
+  medium: {
+    text: "text-amber-700",
+    bg: "bg-amber-50",
+    border: "border-amber-200",
+    dot: "bg-amber-500",
+  },
+  low: {
+    text: "text-slate-600",
+    bg: "bg-slate-50",
+    border: "border-slate-200",
+    dot: "bg-slate-400",
+  },
+} as const
+
+export type Priority = keyof typeof PRIORITY_CLASSES
+
+export function priorityClasses(priority: Priority) {
+  return PRIORITY_CLASSES[priority]
+}

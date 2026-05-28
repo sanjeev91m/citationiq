@@ -1,13 +1,16 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { DimensionCard } from "@/components/dimension-card"
+import { IntentBadge } from "@/components/intent-badge"
+import { PageTypeBadge } from "@/components/page-type-badge"
+import { PrioritizedFixes } from "@/components/prioritized-fixes"
 import { ScoreGauge } from "@/components/score-gauge"
-import { TopFixes } from "@/components/top-fixes"
-import {
-  DIMENSION_KEYS,
-  INTENT_LABELS,
-  PAGE_TYPE_LABELS,
-  type ScoreResult,
-} from "@/types/score"
+import { DIMENSION_KEYS, type ScoreResult } from "@/types/score"
+
+const IMPACT_LABELS: Record<ScoreResult["estimatedImpact"], string> = {
+  high: "High impact",
+  medium: "Medium impact",
+  low: "Low impact",
+}
 
 export function Report({
   score,
@@ -36,14 +39,10 @@ export function Report({
               </a>
             )}
             <div className="flex flex-wrap gap-2 pt-1">
-              <span className="rounded-full border bg-muted px-2.5 py-0.5 text-xs font-medium">
-                Page type: {PAGE_TYPE_LABELS[score.pageType]}
-              </span>
-              <span className="rounded-full border bg-muted px-2.5 py-0.5 text-xs font-medium">
-                Intent: {INTENT_LABELS[score.intent]}
-              </span>
-              <span className="rounded-full border bg-muted px-2.5 py-0.5 text-xs font-medium capitalize">
-                Estimated impact: {score.estimatedImpact}
+              <PageTypeBadge pageType={score.pageType} />
+              <IntentBadge intent={score.intent} />
+              <span className="inline-flex items-center rounded-full border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                {IMPACT_LABELS[score.estimatedImpact]} if fixed
               </span>
             </div>
             <p className="pt-1 leading-relaxed">{score.summary}</p>
@@ -66,10 +65,10 @@ export function Report({
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Strengths
             </h3>
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {score.strengths.map((s, i) => (
                 <li key={i} className="flex gap-2 text-sm">
-                  <span className="text-emerald-600">✓</span>
+                  <span className="shrink-0 text-emerald-600">✓</span>
                   <span>{s}</span>
                 </li>
               ))}
@@ -81,10 +80,10 @@ export function Report({
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Weaknesses
             </h3>
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {score.weaknesses.map((w, i) => (
                 <li key={i} className="flex gap-2 text-sm">
-                  <span className="text-red-600">✗</span>
+                  <span className="shrink-0 text-red-600">✗</span>
                   <span>{w}</span>
                 </li>
               ))}
@@ -93,7 +92,7 @@ export function Report({
         </Card>
       </div>
 
-      <TopFixes fixes={score.fixes} />
+      <PrioritizedFixes fixes={score.fixes} />
     </div>
   )
 }

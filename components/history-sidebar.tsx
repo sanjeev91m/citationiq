@@ -5,6 +5,7 @@ import { History as HistoryIcon, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { clearHistory, getRecentReports } from "@/lib/history"
 import { scoreClasses } from "@/lib/score-color"
+import { PAGE_TYPE_LABELS } from "@/types/score"
 import type { StoredReport } from "@/types/history"
 
 export function HistorySidebar() {
@@ -62,9 +63,10 @@ export function HistorySidebar() {
                             {item.score.overallScore}
                           </span>
                         </div>
-                        {item.url && (
-                          <p className="truncate text-xs text-muted-foreground">{item.url}</p>
-                        )}
+                        <p className="truncate text-xs text-muted-foreground">
+                          {PAGE_TYPE_LABELS[item.score.pageType]}
+                          {item.url ? ` · ${item.url}` : ""}
+                        </p>
                       </a>
                     </li>
                   )

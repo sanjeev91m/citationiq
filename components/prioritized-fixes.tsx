@@ -1,8 +1,21 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CopyButton } from "@/components/copy-button"
-import { PRIORITY_LABELS, type Fix } from "@/types/score"
+import { priorityClasses } from "@/lib/score-color"
+import { PRIORITY_LABELS, type Fix, type Priority } from "@/types/score"
 
-export function TopFixes({ fixes }: { fixes: Fix[] }) {
+function PriorityBadge({ priority }: { priority: Priority }) {
+  const classes = priorityClasses(priority)
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium ${classes.text} ${classes.bg} ${classes.border}`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${classes.dot}`} />
+      {PRIORITY_LABELS[priority]}
+    </span>
+  )
+}
+
+export function PrioritizedFixes({ fixes }: { fixes: Fix[] }) {
   return (
     <Card>
       <CardHeader>
@@ -16,12 +29,10 @@ export function TopFixes({ fixes }: { fixes: Fix[] }) {
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                 {i + 1}
               </span>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-baseline justify-between gap-2">
+              <div className="flex-1 space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-sm font-medium">{fix.title}</span>
-                  <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {PRIORITY_LABELS[fix.priority]}
-                  </span>
+                  <PriorityBadge priority={fix.priority} />
                 </div>
                 <p className="text-sm text-muted-foreground">{fix.description}</p>
               </div>
